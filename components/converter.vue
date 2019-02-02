@@ -17,6 +17,15 @@
         >
           Clear
         </v-btn>
+        <v-btn
+        color="info"
+        @click="copy"
+        id="btncopy"
+        data-clipboard-action="copy"
+        data-clipboard-target="#passwdresult"
+        >
+          Copy
+        </v-btn>
       </v-flex>
       <v-flex xs8>
         <v-select
@@ -42,24 +51,45 @@
           :value='result'
           color="blue"
           hint="A result per line"
+          id="passwdresult"
           auto-grow
         ></v-textarea>
     </v-flex>
+    <v-alert
+      v-model="success"
+      type="success"
+      outline
+      transition="fade-transition"
+      dismissible
+    >
+      Operation succeeded
+    </v-alert>
+    <v-alert
+      v-model="failed"
+      type="error"
+      outline
+      transition="fade-transition"
+      dismissible
+    >
+      Operation failed
+    </v-alert>
     </v-layout>
     </v-container>
 </template>
 
 <script>
 
-
 export default{
-    name:"tab",
+    name:"converter",
     data () {
       return {
         inputvalue:"",
         items: ['Magnet', 'Baidupan', 'Youtube'],
         type:'',
-        result:''
+        result:'',
+        copyProc: null,
+        success:false,
+        failed:false
       }
     },
     props:{
@@ -69,6 +99,7 @@ export default{
     },
     mounted () {
       this.type = this.items[0]
+      this.copyProc = new this.$clipboard("#btncopy")
     },
     methods: {
       clear: function (){
@@ -96,6 +127,18 @@ export default{
           _result[i]=temp.join("")
         }
         this.result=_result.join("\n")
+      },
+      copy: function(){
+        var _this = this
+        //成功回调
+          this.copyProc.on('success', function(e) {
+              _this.success = true
+              e.clearSelection();
+          });
+          //失败回调
+          this.copyProc.on('error', function(e) {
+              _this.failed = true
+          });
       }
     }
 }
